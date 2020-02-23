@@ -1,0 +1,467 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
+#include <SDL/SDL_ttf.h>
+#include <SDL/SDL_mixer.h>
+#include "jeu.h"
+
+
+#ifndef DEF_CONSTANTES 
+#define DEF_CONSTANTES 
+
+#define  LARGEUR_FENETRE	1366
+#define  HAUTEUR_FENETRE 	768
+#define  WIDTH_BUTTON 		250
+#define  HEIGHT_BUTTON 		57
+
+#endif
+
+
+
+
+void menu2(SDL_Surface *ecran, SDL_Rect positionFond, SDL_Rect positionPlay, SDL_Rect positionCredits, SDL_Rect positionOptions, SDL_Rect positionQuit)
+{
+	SDL_Surface *imageDeFond = NULL, *play = NULL, *options = NULL, *credit = NULL, *quit  = NULL, *text = NULL;
+	
+	imageDeFond = IMG_Load("2.bmp");
+	SDL_BlitSurface(imageDeFond, NULL, ecran, &positionFond);
+	
+	play = IMG_Load("play.bmp");
+	SDL_BlitSurface(play, NULL, ecran, &positionPlay);
+
+	options = IMG_Load("SETTING.bmp");
+	SDL_BlitSurface(options, NULL, ecran, &positionOptions);
+
+
+	//credit = IMG_Load("Credits Unpressed.png");
+	//SDL_BlitSurface(credit, NULL, ecran, &positionCredits);
+
+
+	quit = IMG_Load("quit.bmp");
+	SDL_BlitSurface(quit, NULL, ecran, &positionQuit);
+
+	SDL_Flip(ecran);
+}
+
+int main(int argc, char *argv[])
+{
+	
+	SDL_Surface *ecran = NULL, *imageDeFond = NULL, *play = NULL, *options = NULL, *credit = NULL, *quit  = NULL, *text = NULL, *Back = NULL, *BackP = NULL;
+	SDL_Surface *playP = NULL, *optionsP = NULL, *creditsP = NULL, *quitP = NULL;  
+	SDL_Event event;
+	SDL_Event event2;
+	SDL_Rect positionFond, positionPlay, positionOptions, positionCredits, positionQuit, posText, posBack;
+	SDL_Rect  positionClic;
+
+	TTF_Font* font = NULL;
+	
+	
+	
+	//initializing the credits , options surfaces
+	SDL_Surface *TheCredits = NULL, *TheOptions = NULL;
+			/* we will load the image in position de fond*/
+
+	
+	//initialising text variables
+	SDL_Color whitecolor = {255, 255, 255};
+	
+
+	int continuer = 1;
+	int cont = 1;
+	int creditsLoad = 0;
+	int optionsload = 0;
+
+
+	positionFond.x = 0;
+	positionFond.y = 0;
+	
+	
+	positionAffiche.x = 975;
+	positionAffiche.y = 240;
+	
+	positionAffiche1.x = 975;
+	positionAffiche1.y = 360;
+
+	positionAffiche2.x = 975;
+	positionAffiche2.y = 480;
+	
+	
+	//positionQuit.x = 975;
+	//positionQuit.y = 600;
+	
+	posText.x = 25;
+	posText.y = 740;
+
+	posBack.x = 35;
+	posBack.y = 630;
+	
+
+	SDL_Init(SDL_INIT_VIDEO);
+	TTF_Init();
+	
+	//loading the menu
+ 
+	ecran = SDL_SetVideoMode(1366,768, 32, SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_FULLSCREEN);
+	SDL_WM_SetCaption("testing the functions", NULL);
+	menu2(ecran, positionFond, positionPlay, positionCredits, positionOptions, positionQuit);
+
+	//intializing the  music
+	if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024) == -1) //Initialisation de l'API Mixer
+	
+  	{
+      		printf("%s", Mix_GetError());
+	}
+
+	Mix_Music *music;
+	music = Mix_LoadMUS("song.mp3");
+	Mix_Chunk *click;
+	click = Mix_LoadWAV("ButtonClick.wav");
+
+	//SETTING THE VOLUME TO 1/3 of the max volume
+	Mix_VolumeMusic(MIX_MAX_VOLUME / 3);
+		
+		//PLAYING THE MUSIC
+		Mix_PlayMusic(music, -1);
+		
+	 	
+	//printinf the text
+		font = TTF_OpenFont("font.ttf",15);		
+		text = TTF_RenderText_Blended(font, "Lost in Egypt", goldcolor);
+		SDL_BlitSurface(text, NULL, ecran, &posText);	
+		SDL_Flip(ecran);
+	
+
+
+	/*Gestion des evenements
+	while(continuer)
+	{
+		while(SDL_PollEvent(&event))
+		{
+		switch(event.type)
+		{
+			case SDL_QUIT:
+			continuer = 0;
+			break;
+			case SDL_KEYDOWN:
+				switch(event.key.keysym.sym)
+				{
+				case SDLK_ESCAPE:
+				continuer = 0;
+				break;
+					
+				case SDLK_p:			
+				if(!Mix_PlayingMusic())
+				
+				Mix_PlayMusic(music, -1);
+				
+				else if(Mix_PausedMusic())
+			
+				Mix_ResumeMusic();
+			
+				else
+
+				Mix_PauseMusic();
+			
+				break;
+				case SDLK_s:
+				Mix_HaltMusic();
+				break;
+			
+				}
+			break;
+			case SDL_MOUSEBUTTONDOWN:
+			if(event.button.button == SDL_BUTTON_LEFT)
+			{
+				 if(event.button.x >= 975 && event.button.x <= 1330 && event.button.y >= 240 && event.button.y <= 320 && creditsLoad == 0 && optionsload == 0)
+				{
+				
+				playP = IMG_Load("SETTING.bmp");
+				SDL_BlitSurface(playP, NULL, ecran, &positionAffiche);
+				SDL_Flip(ecran);
+				Mix_PlayChannel(-1,click,0);
+				game(ecran,&continuer);
+				}
+				
+				 else if(event.button.x >= 975 && event.button.x <= 1330 && event.button.y >= 360 && event.button.y <= 440 && creditsLoad == 0 && optionsload == 0)
+				{
+				optionsP = IMG_Load("play.bmp");
+				SDL_BlitSurface(optionsP, NULL, ecran, &positionOptions);
+				SDL_Flip(ecran);
+				Mix_PlayChannel(-1,click,0);//playing the click sound 
+
+				/*printinf the options image and back button
+				TheOptions = IMG_Load("optionspage.png");
+				SDL_BlitSurface(TheOptions, NULL, ecran, &positionFond);
+				Back = IMG_Load("unpressed button.png");
+				SDL_BlitSurface(Back, NULL, ecran, &posBack);
+				SDL_Flip(ecran);
+				optionsload = 1;
+				}*/
+				 
+				
+					
+				 else if(event.button.x >= 975 && event.button.x <= 1330 && event.button.y >= 600 && event.button.y <= 680 && creditsLoad == 0 && optionsload == 0)
+				{
+				quitP = IMG_Load("Quit pressed animated.png");
+				SDL_BlitSurface(quitP, NULL, ecran, &positionQuit);
+				SDL_Flip(ecran);
+				Mix_PlayChannel(-1,click,0);
+				continuer = 0;
+				break;
+				}
+
+				//clicking on the back button on credits page
+				else if(event.button.x >= 35 && event.button.x <= 123.5 && event.button.y >= 630 && event.button.y <= 721.5 && creditsLoad == 1)
+				{	
+					BackP = IMG_Load("pressed back button.png");
+					SDL_BlitSurface(BackP, NULL, ecran,&posBack);
+					Mix_PlayChannel(-1,click,0);
+					SDL_Flip(ecran);
+					menu2(ecran, positionFond, positionPlay, positionCredits, positionOptions, positionQuit);
+					creditsLoad = 0;
+				}
+				//clicking on the back  button on options page
+				else if(event.button.x >= 35 && event.button.x <= 123.5 && event.button.y >= 630 && event.button.y <= 721.5 && creditsLoad == 0 && optionsload == 1)
+				{
+				BackP = IMG_Load("pressed back button.png");
+					SDL_BlitSurface(BackP, NULL, ecran,&posBack);
+					Mix_PlayChannel(-1,click,0);
+					SDL_Flip(ecran);
+					menu2(ecran, positionFond, positionPlay, positionCredits, positionOptions, positionQuit);
+					optionsload = 0;
+				}
+
+
+			}
+						
+			break;
+
+
+
+			case SDL_MOUSEBUTTONUP:
+			if(event.button.x >= 975 && event.button.x <= 1330 && event.button.y >= 240 && event.button.y <= 320 && creditsLoad == 0 && optionsload == 0)
+			{
+			play = IMG_Load("play unpressed.png");
+			SDL_BlitSurface(play, NULL, ecran, &positionPlay);
+			SDL_Flip(ecran);
+			}
+			else if(event.button.x >= 975 && event.button.x <= 1330 && event.button.y >= 360 && event.button.y <= 440 && creditsLoad == 0 && optionsload == 0)
+			{
+			options = IMG_Load("Options unpressed.png");
+			SDL_BlitSurface(options, NULL, ecran, &positionOptions);
+			SDL_Flip(ecran);
+			}
+			else if(event.button.x >= 975 && event.button.x <= 1330 && event.button.y >= 480 && event.button.y <= 560 && creditsLoad == 0 && optionsload == 0)
+			{
+			credit = IMG_Load("Credits Unpressed.png");
+			
+			SDL_BlitSurface(credit, NULL, ecran, &positionCredits);
+			SDL_Flip(ecran);
+			}
+			else if(event.button.x >= 975 && event.button.x <= 1330 && event.button.y >= 600 && event.button.y <= 680 && creditsLoad == 0 && optionsload == 0)
+			{
+			quit = IMG_Load("Quit unpressed.png");
+			SDL_BlitSurface(quit, NULL, ecran, &positionQuit);
+			SDL_Flip(ecran);
+			}
+			break;
+			
+		}
+		}	
+	}
+	
+		
+		
+
+		
+		
+	SDL_Flip(ecran);
+	SDL_FreeSurface(imageDeFond);
+	SDL_FreeSurface(play);
+	SDL_FreeSurface(options);
+	SDL_FreeSurface(credit);	
+	SDL_FreeSurface(quit);
+	SDL_FreeSurface(TheCredits);
+	SDL_FreeSurface(TheOptions);
+	SDL_FreeSurface(Back);
+	SDL_FreeSurface(BackP);
+	Mix_FreeMusic(music);
+	Mix_FreeMusic(click);
+	Mix_CloseAudio(); 
+	TTF_CloseFont(font);/*closing the font before freeing the momory*/
+	TTF_Quit();
+	SDL_Quit();
+
+    return EXIT_SUCCESS;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+  case SDL_MOUSEMOTION:
+
+            positionZozor.x = event.motion.x;
+
+            positionZozor.y = event.motion.y;
+
+            break;
+
+*/
+
+
+
+
+
+
+
+
+
+
+/*#include <stdlib.h>
+#include <stdio.h>
+#include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
+#include <SDL/SDL_mixer.h>
+void pause()
+{
+int continuer = 1;
+SDL_Event event;
+while (continuer)
+{
+SDL_WaitEvent(&event);
+switch(event.type)
+{
+case SDL_QUIT:
+continuer = 0;
+}}}
+
+int main(int argc, char *argv[])
+{
+  
+
+  
+
+   int continuer=1;
+
+
+
+     //FMOD_SYSTEM *system;
+    SDL_Surface *ecran =NULL, *imageDeFond =NULL,*affiche=NULL,*affiche1=NULL,*affiche2=NULL;
+    SDL_Rect positionFond,positionAffiche,positionAffiche1,positionAffiche2;
+    SDL_Event event;
+
+    //FMOD_System_Create(&system);
+    //FMOD_System_Init(system, 2, FMOD_INIT_NORMAL, NULL);
+
+
+    positionFond.x =0;
+    positionFond.y =0;
+    positionAffiche.x=200;
+    positionAffiche.y=5;
+
+    positionAffiche1.x=140;
+    positionAffiche1.y=110;
+
+    positionAffiche2.x=260;
+    positionAffiche2.y=200;
+     
+    SDL_Init(SDL_INIT_EVERYTHING);
+SDL_WM_SetIcon(SDL_LoadBMP("sdl_icone.bmp"), NULL);
+ ecran = SDL_SetVideoMode(900,510,32, SDL_HWSURFACE |SDL_DOUBLEBUF);
+    SDL_WM_SetCaption("Chargement d'images en SDL", NULL);
+    imageDeFond = SDL_LoadBMP("2.bmp");
+
+SDL_BlitSurface(imageDeFond,NULL,ecran,&positionFond);
+affiche= SDL_LoadBMP("play.bmp");
+SDL_SetColorKey(affiche,SDL_SRCCOLORKEY,SDL_MapRGB(affiche->format,77,75,75));
+SDL_BlitSurface(affiche,NULL,ecran,&positionAffiche);
+affiche1= SDL_LoadBMP("SETTING.bmp");
+SDL_SetColorKey(affiche1,SDL_SRCCOLORKEY,SDL_MapRGB(affiche1->format,77,75,75));
+SDL_BlitSurface(affiche1,NULL,ecran,&positionAffiche1);
+affiche2= SDL_LoadBMP("quit.bmp");
+SDL_SetColorKey(affiche2,SDL_SRCCOLORKEY,SDL_MapRGB(affiche2->format,77,75,75));
+SDL_BlitSurface(affiche2,NULL,ecran,&positionAffiche2);
+ 
+
+
+
+
+//musique
+if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024) == -1)
+    {
+        printf("%s", Mix_GetError());
+    }
+Mix_Music *musique;
+    musique = Mix_LoadMUS("song.mp3");
+    Mix_PlayMusic(musique,-1);
+//endmusique
+
+
+
+
+while (continuer) 
+    {
+        SDL_WaitEvent(&event); 
+        switch(event.key.keysym.sym) 
+        {
+            
+
+       
+           
+       
+            case SDL_KEYDOWN: 
+           switch(event.key.keysym.sym)
+            {
+             case SDLK_ESCAPE:
+
+                continuer = 0;
+                break;
+             case SDLK_UP: // Flèche haut
+                positionAffiche1.y-=20;
+                break;
+            case SDLK_DOWN: // Flèche bas
+                positionAffiche1.y+=20;
+                break;
+            case SDLK_RIGHT: // Flèche droite
+                positionAffiche1.x+=20;
+                break;
+            case SDLK_LEFT: // Flèche gauche
+                positionAffiche1.x-=20;
+                break;
+              }
+                break;
+            
+        }
+    }
+*/
+
+
+//SDL_BlitSurface(affiche,NULL,ecran,&positionAffiche);
+
+    
+    SDL_Flip(ecran);
+   
+
+ SDL_FreeSurface(imageDeFond);
+SDL_FreeSurface(affiche);
+SDL_FreeSurface(affiche1);
+SDL_FreeSurface(affiche2);
+Mix_FreeMusic(musique);
+    Mix_CloseAudio();
+ pause();
+    SDL_Quit();
+return EXIT_SUCCESS;
+}
